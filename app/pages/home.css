@@ -1,0 +1,15 @@
+.title {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.movieList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.error {
+  color: red;
+  text-align: center;
+}
