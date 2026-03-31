@@ -1,11 +1,8 @@
 'use client';
 
 import { useDispatch, useSelector } from 'react-redux';
-
 import { addFavorite, removeFavorite } from '../../app/Features/movies/movieSlice';
-
 import { useRouter } from 'next/navigation';
-
 import './movieCard.css';
 
 export default function MovieCard({ movie }) {
@@ -14,7 +11,7 @@ export default function MovieCard({ movie }) {
   const router = useRouter();
 
   const isFavorite = favorites.some(
-    (fav) => fav.imdbID === movie.imdbID
+    (fav) => fav.id === movie.id
   );
 
   const handleFavorite = () => {
@@ -27,15 +24,24 @@ export default function MovieCard({ movie }) {
 
   return (
     <div className="card">
+
       <img
-        src={movie.Poster}
-        alt={movie.Title}
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : 'https://via.placeholder.com/300x450?text=No+Image'
+        }
+        alt={movie.title}
         className="poster"
       />
 
-      <h4 className="title">{movie.Title}</h4>
+      <h4 className="title">{movie.title}</h4>
 
-      <p className="year">{movie.Year}</p>
+      <p className="year">
+        {movie.release_date
+          ? movie.release_date.split('-')[0]
+          : 'N/A'}
+      </p>
 
       <button
         className="btn favBtn"
@@ -46,14 +52,6 @@ export default function MovieCard({ movie }) {
           : "Add Favorite"}
       </button>
 
-      <button
-        className="btn detailsBtn"
-        onClick={() =>
-          router.push(`/movies/${movie.imdbID}`)
-        }
-      >
-        View Details
-      </button>
     </div>
   );
 }

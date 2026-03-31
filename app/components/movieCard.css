@@ -31,11 +31,11 @@
 }
 
 .favBtn {
-  background-color: #007bff;
-  color: white;
+  background-color:  #b59514;
+  color: black;
+  font-weight: bold;
 }
-
-.detailsBtn {
-  background-color: #28a745;
-  color: white;
+.favBtn:hover {
+  background-color: rgb(1, 84, 1);
+  color: #ccc;
 }
