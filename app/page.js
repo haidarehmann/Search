@@ -23,12 +23,14 @@ export default function Home() {
 
   const router = useRouter();
   
-  const searchParams = useSearchParams();
-const [showFavorites, setShowFavorites] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
 
 useEffect(() => {
+  // ✅ Only access searchParams in the browser
+  const { useSearchParams } = require('next/navigation');
+  const searchParams = useSearchParams();
   setShowFavorites(searchParams.get('view') === 'favorites');
-}, [searchParams]);
+}, []);
 
   const [dark, setDark] = useState(true);
 
