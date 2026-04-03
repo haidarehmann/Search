@@ -1,6 +1,6 @@
 .title {
     text-align: center;
-    font-size: 32px;
+    font-size: 22px;
     margin-bottom: 20px;
 }
 
@@ -29,8 +29,8 @@
 }
 
 .show {
-    background-color: red;
-    color: black;
+    background-color: rgb(87, 132, 20);
+    color: white;
     padding: 8px 16px;
     border: none;
     border-radius: 8px;
@@ -44,7 +44,7 @@
 }
 
 .show:hover {
-    background-color: darkred;
+    background-color: yellowgreen;
 }
 
 .pagination {

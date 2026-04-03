@@ -8,39 +8,86 @@ export const fetchMovies = createAsyncThunk(
   async ({ term, filters, page = 1 }, { rejectWithValue }) => {
     try {
       const { genre, rating, language, year } = filters || {};
+      const isSearching = term && term.trim() !== '';
+      const hasFilters = genre || rating || language || year;
 
+      if (isSearching && hasFilters) {
+        let allFiltered = [];
+        let apiPage = 1;
+        let totalPages = 1;
+        const RESULTS_PER_PAGE = 20;
+        const TARGET = page * RESULTS_PER_PAGE;
+
+        while (allFiltered.length < TARGET && apiPage <= Math.min(totalPages, 10)) {
+          const url = new URL('https://api.themoviedb.org/3/search/movie');
+          url.searchParams.append('query', term);
+          url.searchParams.append('page', apiPage);
+          url.searchParams.append('include_adult', 'false');
+          url.searchParams.append('language', 'en-US');
+          url.searchParams.append('_t', Date.now()); 
+
+          const res = await axios.get(url.toString(), {
+            headers: {
+              Authorization: `Bearer ${API_TOKEN.trim()}`,
+              accept: 'application/json',
+              'Cache-Control': 'no-cache',
+            },
+          });
+
+          totalPages = res.data.total_pages || 1;
+          let movies = res.data.results || [];
+
+          // Client-side filtering
+          if (genre) movies = movies.filter(m => m.genre_ids?.includes(Number(genre)));
+          if (rating) movies = movies.filter(m => m.vote_average >= Number(rating));
+          if (language) movies = movies.filter(m => m.original_language === language);
+          if (year) movies = movies.filter(m => m.release_date?.startsWith(year));
+
+          allFiltered = [...allFiltered, ...movies];
+          apiPage++;
+        }
+
+        const start = (page - 1) * RESULTS_PER_PAGE;
+        const end = start + RESULTS_PER_PAGE;
+        const pageResults = allFiltered.slice(start, end);
+
+        const estimatedTotal = Math.ceil(allFiltered.length / RESULTS_PER_PAGE) +
+          (allFiltered.length >= TARGET ? 2 : 0);
+
+        return {
+          movies: pageResults,
+          totalPages: Math.max(estimatedTotal, page),
+        };
+      }
+
+      // ✅ Case 2: Sirf Search ya Sirf Filters
       let url;
 
-      if (term && term.trim() !== '') {
-        //  SEARCH API
+      if (isSearching) {
+        // Sirf search term
         url = new URL('https://api.themoviedb.org/3/search/movie');
         url.searchParams.append('query', term);
       } else {
-        //  DISCOVER API
+        // Sirf filters ya default
         url = new URL('https://api.themoviedb.org/3/discover/movie');
-
         if (genre) url.searchParams.append('with_genres', genre);
         if (year) url.searchParams.append('primary_release_year', year);
-        if (language)
-          url.searchParams.append('with_original_language', language);
+        if (language) url.searchParams.append('with_original_language', language);
         if (rating) url.searchParams.append('vote_average.gte', rating);
-
         url.searchParams.append('sort_by', 'popularity.desc');
       }
 
-      //  Common params
+      // Common params
       url.searchParams.append('page', page);
       url.searchParams.append('include_adult', 'false');
-      url.searchParams.append('include_video', 'false');
       url.searchParams.append('language', 'en-US');
-
-      //  DEBUG (optional)
-      console.log('API URL:', url.toString());
+      url.searchParams.append('_t', Date.now()); // ✅ Cache bust
 
       const res = await axios.get(url.toString(), {
         headers: {
           Authorization: `Bearer ${API_TOKEN.trim()}`,
           accept: 'application/json',
+          'Cache-Control': 'no-cache', // ✅ Cache disable
         },
       });
 
@@ -48,6 +95,7 @@ export const fetchMovies = createAsyncThunk(
         movies: res.data.results || [],
         totalPages: res.data.total_pages || 1,
       };
+
     } catch (error) {
       console.log('API ERROR:', error.response?.data || error.message);
       return rejectWithValue('API Failed');
@@ -55,7 +103,6 @@ export const fetchMovies = createAsyncThunk(
   }
 );
 
-//  SLICE
 const movieSlice = createSlice({
   name: 'movies',
   initialState: {
@@ -65,6 +112,8 @@ const movieSlice = createSlice({
     error: null,
     page: 1,
     totalPages: 1,
+    currentTerm: '',
+    currentFilters: {},
   },
   reducers: {
     addFavorite: (state, action) => {
@@ -80,6 +129,10 @@ const movieSlice = createSlice({
     },
     setPage: (state, action) => {
       state.page = action.payload;
+    },
+    setCurrentSearch: (state, action) => {
+      state.currentTerm = action.payload.term;
+      state.currentFilters = action.payload.filters;
     },
   },
   extraReducers: (builder) => {
@@ -100,5 +153,5 @@ const movieSlice = createSlice({
   },
 });
 
-export const { addFavorite, removeFavorite, setPage } = movieSlice.actions;
+export const { addFavorite, removeFavorite, setPage, setCurrentSearch } = movieSlice.actions;
 export default movieSlice.reducer;

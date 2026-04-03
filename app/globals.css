@@ -20,7 +20,7 @@ body {
 
 .toggleBtn {
   position: absolute;
-  top: 35px;
+  top: 22px;
   right: 190px;
   background: #facc15;
   border: none;
@@ -28,4 +28,19 @@ body {
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+}
+.container.light .toggleBtn {
+   background: #facc15;  
+  color: white;
+}
+.container.dark .toggleBtn {
+  background: #facc15;   /* yellow */
+  color: black;
+}
+.container.dark .toggleBtn:hover {
+  background: whitesmoke;
+}
+
+.container.light .toggleBtn:hover {
+  background: #333;
 }

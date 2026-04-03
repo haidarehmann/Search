@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchMovies, setPage } from '../Features/movies/movieSlice';
+import { useDispatch } from 'react-redux';
+import { fetchMovies, setPage, setCurrentSearch } from '../Features/movies/movieSlice';
 import './searchBar.css';
 
 export default function SearchBar() {
@@ -16,16 +16,27 @@ export default function SearchBar() {
     year: '',
   });
 
+  //  Search handler
   const handleSearch = () => {
     dispatch(setPage(1));
+
+    // Save current search term & filters
+    dispatch(setCurrentSearch({ term, filters }));
+
     dispatch(fetchMovies({ term, filters, page: 1 }));
   };
 
+  //  Reset handler
   const handleReset = () => {
     const resetFilters = { genre: '', rating: '', language: '', year: '' };
     setTerm('');
     setFilters(resetFilters);
+
     dispatch(setPage(1));
+
+    // Reset search in Redux
+    dispatch(setCurrentSearch({ term: '', filters: resetFilters }));
+
     dispatch(fetchMovies({ term: '', filters: resetFilters, page: 1 }));
   };
 
@@ -41,6 +52,7 @@ export default function SearchBar() {
           placeholder="Search movies..."
           value={term}
           onChange={(e) => setTerm(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
         />
         <button onClick={handleSearch}>Search</button>
         <button onClick={handleReset} className="resetBtn">Reset</button>
@@ -81,12 +93,11 @@ export default function SearchBar() {
         </select>
 
         {/* Language */}
-
         <select name="language" value={filters.language} onChange={handleFilterChange}>
           <option value="">All Languages</option>
           <option value="en">English</option>
           <option value="hi">Hindi</option>
-          <option value="ur">Urdu</option>       
+          <option value="ur">Urdu</option>
           <option value="es">Spanish</option>
           <option value="fr">French</option>
           <option value="de">German</option>

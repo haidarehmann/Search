@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import SearchBar from './components/SearchBar';
@@ -9,47 +10,56 @@ import { IoMoon, IoSunnyOutline } from "react-icons/io5";
 
 import {
   addFavorite,
-  setPage,
+  setPage,  
   fetchMovies,
+  setCurrentSearch,
 } from './Features/movies/movieSlice';
 import './page.css';
 
 export default function Home() {
   const dispatch = useDispatch();
-  const { movies, loading, error, favorites, page, totalPages } =
+  const { movies, loading, error, favorites, page, totalPages, currentTerm, currentFilters } =
     useSelector((state) => state.movies);
 
-  const [showFavorites, setShowFavorites] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const showFavorites = searchParams.get('view') === 'favorites';
   const [dark, setDark] = useState(true);
 
-  // Use totalPages directly, no 500-page cap
   const totalPagesActual = totalPages || 1;
 
+  // Load initial movies
   useEffect(() => {
+    // ✅ Initial load pe bhi currentSearch set karo
+    dispatch(setCurrentSearch({ term: '', filters: {} }));
     dispatch(fetchMovies({ term: '', filters: {}, page: 1 }));
   }, [dispatch]);
 
+  // Load saved favorites from localStorage
   useEffect(() => {
-    const savedFavorites =
-      JSON.parse(localStorage.getItem('favorites')) || [];
+    const savedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
     savedFavorites.forEach((movie) => dispatch(addFavorite(movie)));
   }, [dispatch]);
 
+  // Save favorites to localStorage
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  // ✅ Pagination — currentTerm & currentFilters use ho rahe hain
   const handlePrevPage = () => {
     if (page > 1) {
-      dispatch(setPage(page - 1));
-      dispatch(fetchMovies({ term: '', filters: {}, page: page - 1 }));
+      const newPage = page - 1;
+      dispatch(setPage(newPage));
+      dispatch(fetchMovies({ term: currentTerm, filters: currentFilters, page: newPage }));
     }
   };
 
   const handleNextPage = () => {
     if (page < totalPagesActual) {
-      dispatch(setPage(page + 1));
-      dispatch(fetchMovies({ term: '', filters: {}, page: page + 1 }));
+      const newPage = page + 1;
+      dispatch(setPage(newPage));
+      dispatch(fetchMovies({ term: currentTerm, filters: currentFilters, page: newPage }));
     }
   };
 
@@ -67,8 +77,11 @@ export default function Home() {
       <h1 className="title">Movie Explorer</h1>
 
       {/* Favorites Toggle */}
-      <button className="show" onClick={() => setShowFavorites(!showFavorites)}>
-        {showFavorites ? `Back to search` : `Favorites (${favorites.length})`}
+      <button
+        className="show"
+        onClick={() => router.push(showFavorites ? '/' : '/?view=favorites')}
+      >
+        {showFavorites ? 'Back to search' : `Favorites (${favorites.length})`}
       </button>
 
       {showFavorites ? (
@@ -85,16 +98,26 @@ export default function Home() {
         </div>
       ) : (
         <div>
+          {/* SearchBar */}
           <SearchBar />
 
+          {/* Loading/Error */}
           {loading && <Loader />}
           {error && <p className="error">{error}</p>}
 
+          {/* Movie List */}
           <div className="movieList">
-            {movies &&
-              movies.map((movie, index) => (
-                <MovieCard key={`${movie.id}-${index}`} movie={movie} />
-              ))}
+            {!loading && movies.filter(movie => movie.poster_path).length === 0 ? (
+              <p style={{ textAlign: 'center', marginTop: '40px', color: '#c11212' }}>
+                No movies found. Try a different search!
+              </p>
+            ) : (
+              movies
+                .filter(movie => movie.poster_path)
+                .map((movie, index) => (
+                  <MovieCard key={`${movie.id}-${index}`} movie={movie} />
+                ))
+            )}
           </div>
 
           {/* Pagination */}
