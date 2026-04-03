@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiOWNkNmMyYzFlZWFiMzg1OTFlZGIyYTM4NmYxYWIzZSIsIm5iZiI6MTc3NDg3MTgzOS42MzkwMDAyLCJzdWIiOiI2OWNhNjUxZjFmOWRmOTZhOTI3MzMwNWEiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.NXW410nthV08yCkOcrx82tQFJwQxoT8cul8pyqPKu0U';
+const API_TOKEN = process.env.NEXT_PUBLIC_TMDB_API_TOKEN || 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiOWNkNmMyYzFlZWFiMzg1OTFlZGIyYTM4NmYxYWIzZSIsIm5iZiI6MTc3NDg3MTgzOS42MzkwMDAyLCJzdWIiOiI2OWNhNjUxZjFmOWRmOTZhOTI3MzMwNWEiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.NXW410nthV08yCkOcrx82tQFJwQxoT8cul8pyqPKu0U';
 
 export const fetchMovies = createAsyncThunk(
   'movies/fetchMovies',
