@@ -22,8 +22,14 @@ export default function Home() {
     useSelector((state) => state.movies);
 
   const router = useRouter();
+  
   const searchParams = useSearchParams();
-  const showFavorites = searchParams.get('view') === 'favorites';
+const [showFavorites, setShowFavorites] = useState(false);
+
+useEffect(() => {
+  setShowFavorites(searchParams.get('view') === 'favorites');
+}, [searchParams]);
+
   const [dark, setDark] = useState(true);
 
   const totalPagesActual = totalPages || 1;
