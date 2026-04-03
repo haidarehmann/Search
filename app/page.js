@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import SearchBar from './components/SearchBar';
 import MovieCard from './components/MovieCard';
@@ -16,7 +16,7 @@ import {
 } from './Features/movies/movieSlice';
 import './page.css';
 
-export default function Home() {
+function HomeContent() {
   const dispatch = useDispatch();
   const { movies, loading, error, favorites, page, totalPages, currentTerm, currentFilters } =
     useSelector((state) => state.movies);
@@ -144,5 +144,13 @@ export default function Home() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <HomeContent />
+    </Suspense>
   );
 }
