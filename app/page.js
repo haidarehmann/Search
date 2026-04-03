@@ -26,7 +26,7 @@ export default function Home() {
   const [showFavorites, setShowFavorites] = useState(false);
 
 useEffect(() => {
-  // ✅ Only access searchParams in the browser
+  //  Only access searchParams in the browser
   const { useSearchParams } = require('next/navigation');
   const searchParams = useSearchParams();
   setShowFavorites(searchParams.get('view') === 'favorites');
