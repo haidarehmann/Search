@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import SearchBar from './components/SearchBar';
@@ -21,9 +20,8 @@ export default function Home() {
   const { movies, loading, error, favorites, page, totalPages, currentTerm, currentFilters } =
     useSelector((state) => state.movies);
 
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const showFavorites = searchParams.get('view') === 'favorites';
+  // ✅ useRouter aur useSearchParams hata diye — simple state se kaam chalao
+  const [showFavorites, setShowFavorites] = useState(false);
   const [dark, setDark] = useState(true);
 
   const totalPagesActual = totalPages || 1;
@@ -66,9 +64,10 @@ export default function Home() {
 
       <h1 className="title">Movie Explorer</h1>
 
+      {/* ✅ router.push ki jagah setShowFavorites */}
       <button
         className="show"
-        onClick={() => router.push(showFavorites ? '/' : '/?view=favorites')}
+        onClick={() => setShowFavorites(!showFavorites)}
       >
         {showFavorites ? 'Back to search' : `Favorites (${favorites.length})`}
       </button>
@@ -90,7 +89,6 @@ export default function Home() {
           {loading && <Loader />}
           {error && <p className="error">{error}</p>}
 
-          {/* ✅ Koi filter nahi — saari movies dikhao, poster ho ya na ho */}
           <div className="movieList">
             {!loading && movies.length === 0 ? (
               <p style={{ textAlign: 'center', marginTop: '40px', color: '#c11212' }}>
