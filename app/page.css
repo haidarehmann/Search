@@ -44,7 +44,7 @@
 }
 
 .show:hover {
-    background-color: yellowgreen;
+    background-color: darkmagenta;
 }
 
 .pagination {
@@ -67,7 +67,7 @@
 }
 
 .pagination button:hover {
-  background: #a0830d;
+  background: darkcyan;
   transform: scale(1.05);
 }
 
