@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState ,useEffect} from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchMovies, setPage, setCurrentSearch } from '../Features/movies/movieSlice';
 import './searchBar.css';
@@ -15,6 +15,10 @@ export default function SearchBar() {
     language: '',
     year: '',
   });
+
+  useEffect(() => {
+  dispatch(fetchMovies({ term, filters, page: 1 }));
+}, [filters]);
 
   //  Search handler
   const handleSearch = () => {
